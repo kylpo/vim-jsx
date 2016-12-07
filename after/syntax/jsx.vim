@@ -2,22 +2,194 @@
 " Vim syntax file
 "
 " Language: JSX (JavaScript)
-" Maintainer: Max Wang <mxawng@gmail.com>
+" Maintainer: @kylpo
 " Depends: pangloss/vim-javascript
 "
-" CREDITS: Inspired by Facebook.
+" CREDITS: Fork of jsx.vim and default xml syntax
 "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-" Prologue; load in XML syntax.
-if exists('b:current_syntax')
-  let s:current_syntax=b:current_syntax
-  unlet b:current_syntax
+let s:xml_cpo_save = &cpo
+set cpo&vim
+
+syn case match
+
+" mark illegal characters
+syn match xmlError "[<&]"
+
+" strings (inside tags) aka VALUES
+"
+" EXAMPLE:
+"
+" <tag foo.attribute = "value">
+"                      ^^^^^^^
+syn region  xmlString contained start=+"+ end=+"+ contains=xmlEntity,@Spell display
+syn region  xmlString contained start=+'+ end=+'+ contains=xmlEntity,@Spell display
+
+
+" punctuation (within attributes) e.g. <tag xml:foo.attribute ...>
+"                                              ^   ^
+" syn match   xmlAttribPunct +[-:._]+ contained display
+syn match   xmlAttribPunct +[:.]+ contained display
+
+" no highlighting for xmlEqual (xmlEqual has no highlighting group)
+syn match   xmlEqual +=+ display
+
+
+" attribute, everything before the '='
+"
+" PROVIDES: @xmlAttribHook
+"
+" EXAMPLE:
+"
+" <tag foo.attribute = "value">
+"      ^^^^^^^^^^^^^
+"
+syn match   xmlAttrib
+      \ +[-'"<]\@1<!\<[a-zA-Z:_][-.0-9a-zA-Z:_]*\>\%(['"]\@!\|$\)+
+      \ contained
+      \ contains=xmlAttribPunct,@xmlAttribHook
+      \ display
+
+syn match   commentedXmlAttrib
+      \ +\/\/.*+
+      \ contained
+      \ contains=xmlAttribPunct,@xmlAttribHook
+      \ display
+
+
+" tag name
+"
+" PROVIDES: @xmlTagHook
+"
+" EXAMPLE:
+"
+" <tag foo.attribute = "value">
+"  ^^^
+"
+syn match   xmlTagName
+      \ +<\@1<=[^ /!?<>"']\++
+      \ contained
+      \ contains=xmlNamespace,xmlAttribPunct,@xmlTagHook
+      \ display
+
+" EXAMPLE:
+"
+" <tag_ foo.attribute = "value">
+"  ^^^^
+"
+syn match   xmlTagNameModifier
+      \ +<\@1<=_\@<![^ /!?<>"']\+_+
+      \ contained
+      \ contains=xmlNamespace,xmlAttribPunct,@xmlTagHook
+      \ display
+
+
+" EXAMPLE:
+"
+" <_tag_ foo.attribute = "value">
+"  ^^^^^
+"
+syn match   xmlTagNameNull
+      \ +<\@1<=_[^ /!?<>"']\+_+
+      \ contained
+      \ contains=xmlNamespace,xmlAttribPunct,@xmlTagHook
+      \ display
+
+
+" EXAMPLE:
+"
+" <tag foo.attribute = "value">
+" ^                           ^
+"
+syn region   xmlTag
+      \ matchgroup=xmlTag start=+<[^_][^ /!?<>"']\@=+
+      \ matchgroup=xmlTag end=+>+
+      \ contains=xmlError,xmlTagName,xmlTagNameModifier,commentedXmlAttrib,xmlAttrib,xmlEqual,xmlString,@xmlStartTagHook
+
+
+" EXAMPLE:
+"
+" <tag_ foo.attribute = "value">
+" ^                            ^
+"
+syn region   xmlModifierTag
+      \ matchgroup=xmlModifierTag start=+<[^_][^ /!?<>"']\+_\@=[^ /!?<>"']\@=+
+      \ matchgroup=xmlModifierTag end=+>+
+      \ contains=xmlError,xmlTagNameModifier,commentedXmlAttrib,xmlAttrib,xmlEqual,xmlString,@xmlStartTagHook
+
+
+" EXAMPLE:
+"
+" <_tag_ foo.attribute = "value">
+" ^                             ^
+"
+syn region   xmlNullTag
+      \ matchgroup=xmlNullTag start=+<_[^ /!?<>"']\+_\@=[^ /!?<>"']\@=+
+      \ matchgroup=xmlNullTag end=+>+
+      \ contains=xmlError,xmlTagNameModifier,xmlTagNameNull,commentedXmlAttrib,xmlAttrib,xmlEqual,xmlString,@xmlStartTagHook
+
+
+" EXAMPLE:
+"
+" </tag>
+" ^^^^^^
+"
+syn match   xmlEndTag
+      \ +</[^ /!?<>"']\+>+
+      \ contains=xmlNamespace,xmlAttribPunct,@xmlTagHook
+
+
+" EXAMPLE:
+"
+" </tag_>
+" ^^^^^^^
+"
+syn match   xmlModifierEndTag
+      \ +</[^ /!?<>"']\+_>+
+      \ contains=xmlNamespace,xmlAttribPunct,@xmlTagHook
+
+syn match   xmlEntity                 "&[^; \t]*;" contains=xmlEntityPunct
+syn match   xmlEntityPunct  contained "[&.;]"
+
+syn sync minlines=100
+
+
+" Identifier = red
+" keywork = pink
+"
+" The default highlighting.
+hi def link xmlTodo		Todo
+hi def link xmlTag		Function
+hi def link xmlTagName		Function
+hi def link xmlEndTag		Function
+hi def link xmlModifierTag		Operator
+hi def link xmlTagNameModifier		Operator
+hi def link xmlModifierEndTag		Operator
+hi def link xmlNullTag		Identifier
+hi def link xmlTagNameNull		Identifier
+if !exists("g:xml_namespace_transparent")
+  hi def link xmlNamespace	Tag
 endif
-syn include @XMLSyntax syntax/xml.vim
-if exists('s:current_syntax')
-  let b:current_syntax=s:current_syntax
-endif
+hi def link xmlEntity		Statement
+hi def link xmlEntityPunct	Type
+
+hi def link xmlAttribPunct	Comment
+hi def link xmlAttrib		Type
+hi def link commentedXmlAttrib		Comment
+
+hi def link xmlString		String
+hi def link xmlError		Error
+
+hi def link xmlProcessingDelim	Comment
+
+" let b:current_syntax = "xml"
+
+let &cpo = s:xml_cpo_save
+unlet s:xml_cpo_save
+
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 " Officially, vim-jsx depends on the pangloss/vim-javascript syntax package
 " (and is tested against it exclusively).  However, in practice, we make some
@@ -46,9 +218,8 @@ syn region jsxChild contained start=+{+ end=++ contains=jsBlock,javascriptBlock
 " preceding it, to avoid conflicts with, respectively, the left shift operator
 " and generic Flow type annotations (http://flowtype.org/).
 syn region jsxRegion
-  \ contains=@Spell,@XMLSyntax,jsxRegion,jsxChild,jsBlock,javascriptBlock
+  \ contains=@Spell,xmlTag,xmlNullTag,xmlModifierTag,xmlEndTag,xmlModifierEndTag,xmlNullEndTag,Region,xmlEntity,xmlProcessing,@xmlRegionHook,jsxRegion,jsxChild,jsBlock,javascriptBlock
   \ start=+\%(<\|\w\)\@<!<\z(\h[a-zA-Z0-9:\-.]*\)+
-  \ skip=+<!--\_.\{-}-->+
   \ end=+</\z1\_\s\{-}>+
   \ end=+/>+
   \ keepend

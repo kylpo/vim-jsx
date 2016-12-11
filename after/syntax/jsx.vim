@@ -68,10 +68,9 @@ syn match   commentedXmlAttrib
 "  ^^^
 "
 syn match   xmlTagName
-      \ +<\@1<=[^ /!?<>"']\++
+      \ +<\@<=[^ /!?<>"']\++
       \ contained
-      \ contains=xmlNamespace,xmlAttribPunct,@xmlTagHook
-      \ display
+      \ contains=xmlAttribPunct
 
 " EXAMPLE:
 "
@@ -79,9 +78,9 @@ syn match   xmlTagName
 "  ^^^^
 "
 syn match   xmlTagNameModifier
-      \ +<\@1<=_\@<![^ /!?<>"']\+_+
+      \ +<\@<=_\@<![^ /!?<>"']\+_+
       \ contained
-      \ contains=xmlNamespace,xmlAttribPunct,@xmlTagHook
+      \ contains=xmlAttribPunct,@xmlTagHook
       \ display
 
 
@@ -91,9 +90,9 @@ syn match   xmlTagNameModifier
 "  ^^^^^
 "
 syn match   xmlTagNameNull
-      \ +<\@1<=_[^ /!?<>"']\+_+
+      \ +<\@<=_[^ /!?<>"']\+_+
       \ contained
-      \ contains=xmlNamespace,xmlAttribPunct,@xmlTagHook
+      \ contains=xmlAttribPunct,@xmlTagHook
       \ display
 
 
@@ -104,8 +103,8 @@ syn match   xmlTagNameNull
 "
 syn region   xmlTag
       \ matchgroup=xmlTag start=+<[^_][^ /!?<>"']\@=+
-      \ matchgroup=xmlTag end=+>+
-      \ contains=xmlError,xmlTagName,xmlTagNameModifier,commentedXmlAttrib,xmlAttrib,xmlEqual,xmlString,@xmlStartTagHook
+      \ end=+>+
+      \ contains=xmlError,xmlTagName,commentedXmlAttrib,xmlAttrib,xmlEqual,xmlString,@xmlStartTagHook
 
 
 " EXAMPLE:
@@ -114,8 +113,10 @@ syn region   xmlTag
 " ^                            ^
 "
 syn region   xmlModifierTag
-      \ matchgroup=xmlModifierTag start=+<[^_][^ /!?<>"']\+_\@=[^ /!?<>"']\@=+
-      \ matchgroup=xmlModifierTag end=+>+
+      \ matchgroup=xmlTagNameModifier
+      \ start=+<[^_][^ /!?<>"']\+_\@=[^ /!?<>"']\@=+
+      \ matchgroup=xmlTagNameModifier
+      \ end=+>+
       \ contains=xmlError,xmlTagNameModifier,commentedXmlAttrib,xmlAttrib,xmlEqual,xmlString,@xmlStartTagHook
 
 
@@ -127,7 +128,7 @@ syn region   xmlModifierTag
 syn region   xmlNullTag
       \ matchgroup=xmlNullTag start=+<_[^ /!?<>"']\+_\@=[^ /!?<>"']\@=+
       \ matchgroup=xmlNullTag end=+>+
-      \ contains=xmlError,xmlTagNameModifier,xmlTagNameNull,commentedXmlAttrib,xmlAttrib,xmlEqual,xmlString,@xmlStartTagHook
+      \ contains=xmlError,xmlTagNameNull,commentedXmlAttrib,xmlAttrib,xmlEqual,xmlString,@xmlStartTagHook
 
 
 " EXAMPLE:
@@ -155,22 +156,16 @@ syn match   xmlEntityPunct  contained "[&.;]"
 syn sync minlines=100
 
 
-" Identifier = red
-" keywork = pink
-"
 " The default highlighting.
 hi def link xmlTodo		Todo
 hi def link xmlTag		Function
-hi def link xmlTagName		Function
+hi def link xmlTagName		Identifier
 hi def link xmlEndTag		Function
-hi def link xmlModifierTag		Operator
-hi def link xmlTagNameModifier		Operator
-hi def link xmlModifierEndTag		Operator
+hi def link xmlModifierTag		Type
+hi def link xmlTagNameModifier		JSXModifier
+hi def link xmlModifierEndTag		JSXModifier
 hi def link xmlNullTag		Identifier
-hi def link xmlTagNameNull		Identifier
-if !exists("g:xml_namespace_transparent")
-  hi def link xmlNamespace	Tag
-endif
+" hi def link xmlTagNameNull		Identifier
 hi def link xmlEntity		Statement
 hi def link xmlEntityPunct	Type
 

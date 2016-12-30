@@ -215,7 +215,7 @@ syn region jsxChild contained start=+{+ end=++ contains=jsBlock,javascriptBlock
 " and generic Flow type annotations (http://flowtype.org/).
 syn region jsxRegion
   \ contains=@Spell,xmlTag,xmlNullTag,xmlModifierTag,xmlEndTag,xmlModifierEndTag,xmlNullEndTag,Region,xmlEntity,xmlProcessing,@xmlRegionHook,jsxRegion,jsxChild,jsBlock,javascriptBlock
-  \ start=+\%(<\|\w\)\@<!<\z(\h[a-zA-Z0-9:\-.]*\)+
+  \ start=+\%(<\|\w\)\@<!<\z(\h[a-zA-Z0-9:\-_.]*\)+
   \ end=+</\z1\_\s\{-}>+
   \ end=+/>+
   \ keepend

@@ -158,10 +158,10 @@ syn sync minlines=100
 
 " The default highlighting.
 hi def link xmlTodo		Todo
-hi def link xmlTag		Function
+hi def link xmlTag		Type
 hi def link xmlTagName		Identifier
-hi def link xmlEndTag		Function
-hi def link xmlModifierTag		Type
+hi def link xmlEndTag		Type
+hi def link xmlModifierTag		Function
 hi def link xmlTagNameModifier		JSXModifier
 hi def link xmlModifierEndTag		JSXModifier
 hi def link xmlNullTag		Identifier
@@ -170,13 +170,14 @@ hi def link xmlEntity		Statement
 hi def link xmlEntityPunct	Type
 
 hi def link xmlAttribPunct	Comment
-hi def link xmlAttrib		Type
+hi def link xmlAttrib		Function
 hi def link commentedXmlAttrib		Comment
 
 hi def link xmlString		String
 hi def link xmlError		Error
 
 hi def link xmlProcessingDelim	Comment
+
 
 " let b:current_syntax = "xml"
 

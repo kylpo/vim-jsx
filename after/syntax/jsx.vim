@@ -106,6 +106,15 @@ syn region   xmlTag
       \ end=+>+
       \ contains=xmlError,xmlTagName,commentedXmlAttrib,xmlAttrib,xmlEqual,xmlString,@xmlStartTagHook
 
+" EXAMPLE:
+"
+" <TAG foo.attribute = "value">
+" ^                           ^
+"
+syn region   xmlImmutableTag
+      \ matchgroup=xmlImmutableTag start=+<[^_][^ /!?<>"'a-z]\@=+
+      \ end=+>+
+      \ contains=xmlError,xmlTagName,commentedXmlAttrib,xmlAttrib,xmlEqual,xmlString,@xmlStartTagHook
 
 " EXAMPLE:
 "
@@ -165,7 +174,7 @@ hi def link xmlModifierTag		Function
 hi def link xmlTagNameModifier		JSXModifier
 hi def link xmlModifierEndTag		JSXModifier
 hi def link xmlNullTag		Identifier
-" hi def link xmlTagNameNull		Identifier
+hi def link xmlImmutableTag		Number
 hi def link xmlEntity		Statement
 hi def link xmlEntityPunct	Type
 
@@ -214,7 +223,7 @@ syn region jsxChild contained start=+{+ end=++ contains=jsBlock,javascriptBlock
 " preceding it, to avoid conflicts with, respectively, the left shift operator
 " and generic Flow type annotations (http://flowtype.org/).
 syn region jsxRegion
-  \ contains=@Spell,xmlTag,xmlNullTag,xmlModifierTag,xmlEndTag,xmlModifierEndTag,xmlNullEndTag,Region,xmlEntity,xmlProcessing,@xmlRegionHook,jsxRegion,jsxChild,jsBlock,javascriptBlock
+  \ contains=@Spell,xmlTag,xmlNullTag,xmlImmutableTag,xmlModifierTag,xmlEndTag,xmlModifierEndTag,xmlNullEndTag,Region,xmlEntity,xmlProcessing,@xmlRegionHook,jsxRegion,jsxChild,jsBlock,javascriptBlock
   \ start=+\%(<\|\w\)\@<!<\z(\h[a-zA-Z0-9:\-_.]*\)+
   \ end=+</\z1\_\s\{-}>+
   \ end=+/>+
